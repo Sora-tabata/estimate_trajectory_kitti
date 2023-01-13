@@ -24,14 +24,15 @@ class ViewCoord():
     #    self.opensfm = CalcTraj().calcOpensfm(self.groundtruth, self.json_file0)
     
     def showTrajectory(self, groundtruth, opensfm, orbslam, droidslam, optimized, equalizedORB, equalizedDROID):
+        plt.rcParams['font.family'] = 'Times New Roman'
         fig, traj = plt.subplots(figsize=(32, 32))
-        traj.plot(groundtruth[1], groundtruth[2], color="black", lw=0.5, label="Ground Truth")
-        traj.plot(opensfm[0], opensfm[1], color="red", lw=2, label="OpenSfM")
-        traj.plot(orbslam[0], orbslam[1], color="green", lw=2, label="ORB-SLAM2")
-        traj.plot(droidslam[0], droidslam[1], color="blue", lw=2, label="DROID-SLAM")
-        traj.plot(optimized[0], optimized[1], color="magenta", lw=4, label="Optimized")
-        traj.plot(equalizedORB[0], equalizedORB[1], color="lightgreen", lw=2, label="equalized ORB-SLAM2")
-        traj.plot(equalizedDROID[0], equalizedDROID[1], color="cyan", lw=2, label="equalized DROID-SLAM")
+        traj.scatter(groundtruth[1], groundtruth[2], color="black", s=0.2, label="Ground Truth")
+        traj.scatter(opensfm[0], opensfm[1], color="red", s=0.2, label="OpenSfM")
+        traj.scatter(orbslam[0], orbslam[1], color="green", s=0.2, label="ORB-SLAM2")
+        traj.scatter(droidslam[0], droidslam[1], color="blue", s=0.2, label="DROID-SLAM")
+        traj.scatter(optimized[0], optimized[1], color="magenta", s=0.2, label="Optimized")
+        traj.scatter(equalizedORB[0], equalizedORB[1], color="lightgreen", s=0.2, label="equalized ORB-SLAM2")
+        traj.scatter(equalizedDROID[0], equalizedDROID[1], color="cyan", s=0.2, label="equalized DROID-SLAM")
         traj.set_aspect('equal')
         traj.legend(fancybox=False, shadow=False, edgecolor='black')
         traj.set_ylabel("Depth direction [m]")
@@ -43,6 +44,7 @@ class ViewCoord():
         #plt.show()
     
     def showZ(self, groundtruth, opensfm, orbslam, droidslam, optimized):
+        plt.rcParams['font.family'] = 'Times New Roman'
         fig, traj = plt.subplots()
         time = CalcTraj().Nx
         #traj.plot(groundtruth[1], groundtruth[0], color="black", lw=0.5, label="Ground Truth")
@@ -61,6 +63,7 @@ class ViewCoord():
         #plt.show()
     
     def showRoll(self, groundtruth, opensfm, orbslam, droidslam, optimized, equalizedORB, equalizedDROID):
+        plt.rcParams['font.family'] = 'Times New Roman'
         fig, roll = plt.subplots(figsize=(32, 8))
         time = CalcTraj().Nx
         #time2x = N2x
@@ -82,6 +85,7 @@ class ViewCoord():
         #plt.show()
     
     def showPitch(self, groundtruth, opensfm, orbslam, droidslam, optimized, equalizedORB, equalizedDROID):
+        plt.rcParams['font.family'] = 'Times New Roman'
         fig, pitch = plt.subplots(figsize=(32, 8))
         time = CalcTraj().Nx
         #time2x = N2x
@@ -103,6 +107,7 @@ class ViewCoord():
         #plt.show()
 
     def showYaw(self, groundtruth, opensfm, orbslam, droidslam, optimized, equalizedORB, equalizedDROID):
+        plt.rcParams['font.family'] = 'Times New Roman'
         fig,yaw = plt.subplots(figsize=(32, 8))
         time = CalcTraj().Nx
         #time2x = N2x

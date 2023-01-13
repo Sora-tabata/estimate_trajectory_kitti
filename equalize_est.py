@@ -87,10 +87,14 @@ class Equalize():
     def averagedSLAM(self, a, b, c, d, e, f, g, h, i, j, slam):
         L = []
         for data in [a, b, c, d, e, f, g, h, i, j]:
+            #print(data[0][0])
             if(len(data) == 0):
+                continue
+            elif (slam == 'ORBSLAM' and data[0][0] != 0):
                 continue
             else:
                 L.append(data.tolist())
+        #print(np.array(L).shape)
         output_all = []
         x = []
         y = []

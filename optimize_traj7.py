@@ -301,6 +301,14 @@ class OptimizeTraj():
         for i in range(len(self.time)):
             #xyz_opt.append(-np.dot(np.array(R_opt[i]).T, np.array(t_opt[i])))
             xyz_opt.append(np.array(t_opt[i]))
+        
+        x_ = np.vstack([np.array(xyz_opt).T[0], np.array(xyz_opt).T[1]]).T
+        y_ = np.vstack([self.groundtruth[1], self.groundtruth[2]]).T
+        x_ = x_ - x_.mean(axis=0)
+        y_ = y_ - y_.mean(axis=0)
+        U, S, V = np.linalg.svd(x_.T @ y_)
+        R = V.T @ U.T
+        x_ = (R @ x_.T).T
         #print(np.array(xyz_opt).T[0])
         #l_orb = 0
         #for n in range(len(self.time) - 1):
@@ -327,8 +335,7 @@ class OptimizeTraj():
             r1[i] = -eul[0]
             p1[i] = -eul[1]
             ya1[i] = -eul[2]
-        
-
+        #x_[:, 0]-x_[0, 0], x_[:, 1]-x_[0, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
         return np.array(xyz_opt)[:, 0], np.array(xyz_opt)[:, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
     
     

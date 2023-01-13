@@ -117,7 +117,7 @@ if __name__ == '__main__':
 	# print(re_fpoints[0])
 	# print(trans_error)
 	plt.scatter(ground_points[0], ground_points[2], s=0.1)
-	print(ground_points.shape)
+	#print(ground_points.shape)
 	plt.scatter(list(re_fpoints[0]), list(re_fpoints[2]), s=0.1, c='red')
 	aa = list(re_fpoints[0])
 	x = aa[0].tolist()

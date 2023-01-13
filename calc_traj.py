@@ -18,8 +18,11 @@ MakeTestList().exportFile()
 
 class CalcTraj():
     def __init__(self):
-        self.n_frame = Init().n_frame
-        self.Nx = Init().Nx
+        a = Init()
+        self.n_frame = a.n_frame
+        self.Nx = a.Nx
+        self.ground_time = a.ground_time
+        self.ground_data = a.ground_data
 
     def calcGroundTruth(self, ground_time, res_time, ground_data):
         
@@ -31,12 +34,16 @@ class CalcTraj():
         #print(ground_points.shape)
         for n in range(self.n_frame-1):
             l[n] = np.sqrt(
-                (ground_points[0][n + 1] - ground_points[0][n]) ** 2 + (ground_points[1][n + 1] - ground_points[1][n]) ** 2 + (ground_points[2][n + 1] - ground_points[2][n]) ** 2)
+                (ground_points[0][n + 1] - ground_points[0][n]) ** 2 + (ground_points[1][n + 1] - ground_points[1][n]) ** 2)
             L = L + l[n]
             distance.append(L)
-        return L, ground_points[0], ground_points[2]
+        return L, ground_points[0]- ground_points[0][0], ground_points[2]-ground_points[2][0], ground_points[1]
 
     def calcOrbslam(self, groundtruth, L):
+        ground_time = self.ground_time
+        ground_data = self.ground_data
+        groundtruth = CalcTraj().calcGroundTruth(ground_time, Init().L0, ground_data)
+        
         time = self.Nx
         t_orb = L[:, 0]  # /1000000000
         x_orb = L[:, 3]
@@ -71,6 +78,7 @@ class CalcTraj():
         l_orb = np.zeros(len(time))
         L_orb = 0
         distance = []
+        #print(np.array(x_re).shape, "len")
         for n in range(len(x_re)-1):
             l_orb[n] = np.sqrt((x_re[n + 1] - x_re[n]) ** 2 + (y_re[n + 1] - y_re[n]) ** 2 + (z_re[n + 1] - z_re[n]) ** 2)
             L_orb = L_orb + l_orb[n]
@@ -80,7 +88,18 @@ class CalcTraj():
         x_vf = x_re * k_v
         y_vf = y_re * k_v
         z_vf = z_re * k_v
-        return y_vf-y_vf[0], x_vf-x_vf[0], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
+
+        x_ = np.vstack([y_vf, x_vf]).T
+        y_ = np.vstack([groundtruth[1], groundtruth[2]]).T
+        x_ = x_ - x_.mean(axis=0)
+        y_ = y_ - y_.mean(axis=0)
+        U, S, V = np.linalg.svd(x_.T @ y_)
+        R = V.T @ U.T
+        x_ = (R @ x_.T).T
+
+        #x_[:, 0], x_[:, 1], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
+        #y_vf-y_vf[0], x_vf-x_vf[0], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
+        return x_[:, 0] - x_[0, 0], x_[:, 1] - x_[0, 1], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
 
     @staticmethod
     def rotationMatrixToEulerAngles(self, R):
