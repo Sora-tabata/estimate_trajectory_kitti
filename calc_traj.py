@@ -11,76 +11,30 @@ from scipy.spatial.transform import Rotation
 import math
 import glob
 from init import Init
-#from make_testlist import MakeTestList
-#MakeTestList().exportFile()
+import orbslam_eva
+from make_testlist import MakeTestList
+MakeTestList().exportFile()
 
 
 class CalcTraj():
     def __init__(self):
         self.n_frame = Init().n_frame
-        self.frame = self.n_frame - 3
-        self.len_groundtruth = Init().len_groundtruth
-        self.time_groundtruth = Init().time_groundtruth
         self.Nx = Init().Nx
 
-    def calcGroundTruth(self, N, M):
-        time = self.time_groundtruth[:]
-        vel_km = N[:]
-        vel = vel_km / 3.6
-        ac_x = M[:, 0]
-        ac_y = M[:, 1]
-        ac_z = M[:, 2]
-        FPS = 14  #ここを変更
-        dt = 1 / FPS
-
-        # true of posture姿勢の真値
-        #yaw_t = M[:, 0] - 360
-        #for j in range(len(yaw_t)):
-        #    if (yaw_t[j] < -300):
-        #        yaw_t[j] = yaw_t[j] + 360
-        #pitch_t = M[:, 1]
-        #roll_t = M[:, 2]
-        #yawrate = M[:, 3]
-
-        # 速度（車速パルス）→移動距離
-        distance = np.trapz(vel, None, dt)
-        cdistance = integrate.cumtrapz(vel, None, dt)
-        T = np.dstack([time, np.insert(cdistance, 0, 0)])
-
-        # ac2vel
-        # 加速度→速度→速さ
-        cvelo_x1 = integrate.cumtrapz(ac_x, None, dt)
-        cvelo_x = np.zeros(len(cvelo_x1))
-        for i in range(len(cvelo_x)):
-            cvelo_x[i] = cvelo_x1[i] + vel[0]
-        cvelo_y = integrate.cumtrapz(ac_y, None, dt)
-        speed = np.sqrt(cvelo_x ** 2 + cvelo_y ** 2)
-
-        # vel2dis
-        # 速さ→移動距離
-        distance_xy = np.trapz(speed, None, dt)
-        cdistance_xy = integrate.cumtrapz(speed, None, dt)
-        T_xy = np.dstack([time[0:self.len_groundtruth-1], np.insert(cdistance_xy, 0, 0)])
-        # ロール，ピッチ角（加速度から）
-        r = np.rad2deg(np.arctan(ac_y / ac_z))
-        p = np.rad2deg(np.arctan(- ac_x / np.sqrt(ac_y ** 2 + ac_z ** 2)))
-        L_v = cdistance[self.len_groundtruth-2]
-
-        #theta = np.zeros(self.len_groundtruth)
-        #x_t = np.zeros(self.len_groundtruth)
-        #y_t = np.zeros(self.len_groundtruth)
-        #for i in range(self.len_groundtruth - 1):
-        #    theta[i + 1] = theta[i] + np.deg2rad((yawrate[i] * dt))
-        #    x_t[i + 1] = x_t[i] + vel[i] * np.cos(theta[i]) * dt
-        #    y_t[i + 1] = y_t[i] + vel[i] * np.sin(theta[i]) * dt
-
-        #l_t = np.zeros(self.len_groundtruth)
-        #L_t = 0
-        #for i in range(self.frame - 1):
-        #    l_t[i] = np.sqrt((x_t[i + 1] - x_t[i]) ** 2 + (y_t[i + 1] - y_t[i]) ** 2)
-        #    L_t = L_t + l_t[i]
+    def calcGroundTruth(self, ground_time, res_time, ground_data):
         
-        return L_v, ac_x, ac_y, ac_z
+        data= orbslam_eva.gen_data(ground_time, res_time, ground_data)[1]
+        ground_points = np.asarray(orbslam_eva.get_coo(data))
+        l = np.zeros(self.n_frame-1)
+        L = 0
+        distance = []
+        #print(ground_points.shape)
+        for n in range(self.n_frame-1):
+            l[n] = np.sqrt(
+                (ground_points[0][n + 1] - ground_points[0][n]) ** 2 + (ground_points[1][n + 1] - ground_points[1][n]) ** 2 + (ground_points[2][n + 1] - ground_points[2][n]) ** 2)
+            L = L + l[n]
+            distance.append(L)
+        return L, ground_points[0], ground_points[2]
 
     def calcOrbslam(self, groundtruth, L):
         time = self.Nx
@@ -185,7 +139,6 @@ class CalcTraj():
         l_sfm = np.zeros(len(name_data)-1)
         L_sfm = 0
         distance = []
-
         for n in range(len(name_data)-1):
             l_sfm[n] = np.sqrt(
                 (x_sfm[n + 1] - x_sfm[n]) ** 2 + (y_sfm[n + 1] - y_sfm[n]) ** 2 + (z_sfm[n + 1] - z_sfm[n]) ** 2)

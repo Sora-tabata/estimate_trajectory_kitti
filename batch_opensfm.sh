@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-dir_path="/mnt/source/dataset/data_kitti/*"
+dir_path="/mnt/source/dataset/03only/*"
 dirs=`find $dir_path -maxdepth 0 -type d`
 
 for dir in $dirs;

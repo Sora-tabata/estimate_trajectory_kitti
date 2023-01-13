@@ -4,24 +4,23 @@ from scipy import interpolate
 
 class Init():
     def __init__(self):
-        self.N0 = np.loadtxt(glob.glob('estimated_*')[0], encoding="shift-jis", delimiter=',', skiprows=1, usecols=[1])
-        self.M0 = np.loadtxt(glob.glob('ID*')[0], encoding="shift_jisx0213", delimiter=',', skiprows=1, usecols=[6, 7, 8])
-        self.gps_t_ = np.loadtxt(glob.glob('ID*')[0], encoding="shift_jisx0213", delimiter=',', skiprows=1, usecols=[4, 5])
+        #self.N0 = np.loadtxt(glob.glob('estimated_*')[0], encoding="shift-jis", delimiter=',', skiprows=1, usecols=[1])
+        #self.M0 = np.loadtxt(glob.glob('ID*')[0], encoding="shift_jisx0213", delimiter=',', skiprows=1, usecols=[6, 7, 8])
+        #self.gps_t_ = np.loadtxt(glob.glob('ID*')[0], encoding="shift_jisx0213", delimiter=',', skiprows=1, usecols=[4, 5])
         self.n_frame = len(glob.glob("images/*.png"))
-        index = np.where(self.gps_t_.T[0] != 0)[0]
-        
-        gps_t_x = interpolate.interp1d(index, self.gps_t_[index].T[0], fill_value=(self.gps_t_.T[0][index[0]], self.gps_t_.T[0][index[-1]]), bounds_error=False)(np.arange(self.n_frame))
-        gps_t_y = interpolate.interp1d(index, self.gps_t_[index].T[1], fill_value=(self.gps_t_.T[1][index[0]], self.gps_t_.T[1][index[-1]]), bounds_error=False)(np.arange(self.n_frame))
-        self.gps_t = np.vstack([gps_t_x, gps_t_y]).T
+        #gps_t_x = interpolate.interp1d(index, self.gps_t_[index].T[0], fill_value=(self.gps_t_.T[0][index[0]], self.gps_t_.T[0][index[-1]]), bounds_error=False)(np.arange(self.n_frame))
+        #gps_t_y = interpolate.interp1d(index, self.gps_t_[index].T[1], fill_value=(self.gps_t_.T[1][index[0]], self.gps_t_.T[1][index[-1]]), bounds_error=False)(np.arange(self.n_frame))
+        #self.gps_t = np.vstack([gps_t_x, gps_t_y]).T
 
         self.L0 = np.loadtxt('KeyFrameTrajectory.txt', delimiter=' ')
-        
+        self.ground_time = np.loadtxt('times.txt')
+        self.ground_data = np.loadtxt('groundtruth.txt')
         
         self.json_file0 = open('reconstruction.json', 'r')
         
-        self.len_groundtruth = len(np.loadtxt(glob.glob('ID*')[0], encoding="shift_jisx0213", delimiter=',', skiprows=1, usecols=[4])) #ここを変更
-        self.time_groundtruth = np.arange(self.len_groundtruth)*(1/14) #ここを変更
-        self.Nx  = np.arange(self.n_frame)*(1/14)
+        #self.len_groundtruth = len(np.loadtxt(glob.glob('ID*')[0], encoding="shift_jisx0213", delimiter=',', skiprows=1, usecols=[4])) #ここを変更
+        #self.time_groundtruth = np.arange(self.len_groundtruth)*(1/14) #ここを変更
+        self.Nx  = self.ground_time
         #self.day = np.loadtxt(glob.glob('ID*')[0], encoding="shift-jis", dtype="unicode", delimiter=',', skiprows=2, usecols=[27])[0].replace('/', '-')
         #self.time = np.loadtxt(glob.glob('ID*')[0], encoding="shift-jis", dtype="unicode", delimiter=',', skiprows=2, usecols=[16, 17, 18, 19])
         self.droid = np.vstack([np.load('tstamps.npy').T, np.load('poses.npy').T]).T

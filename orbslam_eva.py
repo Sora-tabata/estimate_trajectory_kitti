@@ -24,7 +24,7 @@ def gen_data(ground_time, res_time, ground_data):
 			time_mark+=1
 		data_2.append(data_1[time_mark])
 
-	return data_2
+	return data_2, data_1
 
 
 def get_coo(data):
@@ -107,7 +107,7 @@ if __name__ == '__main__':
   
   #Path to the ground truth file
 	ground_data = np.loadtxt('groundtruth.txt')
-	data= gen_data(ground_time, res_time, ground_data)
+	data= gen_data(ground_time, res_time, ground_data)[0]
 	ground_points = np.asarray(get_coo(data))
 	re_points = np.asarray(get_points(res_time))
 	# print(type(ground_points))
@@ -117,6 +117,7 @@ if __name__ == '__main__':
 	# print(re_fpoints[0])
 	# print(trans_error)
 	plt.scatter(ground_points[0], ground_points[2], s=0.1)
+	print(ground_points.shape)
 	plt.scatter(list(re_fpoints[0]), list(re_fpoints[2]), s=0.1, c='red')
 	aa = list(re_fpoints[0])
 	x = aa[0].tolist()
