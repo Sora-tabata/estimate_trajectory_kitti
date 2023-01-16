@@ -34,10 +34,10 @@ class CalcTraj():
         #print(ground_points.shape)
         for n in range(self.n_frame-1):
             l[n] = np.sqrt(
-                (ground_points[0][n + 1] - ground_points[0][n]) ** 2 + (ground_points[1][n + 1] - ground_points[1][n]) ** 2)
+                (ground_points[0][n + 1] - ground_points[0][n]) ** 2 +  (ground_points[1][n + 1] - ground_points[1][n]) ** 2 + (ground_points[2][n + 1] - ground_points[2][n]) ** 2)
             L = L + l[n]
             distance.append(L)
-        return L, ground_points[0]- ground_points[0][0], ground_points[2]-ground_points[2][0], ground_points[1]
+        return L, ground_points[0], ground_points[2], ground_points[1]
 
     def calcOrbslam(self, groundtruth, L):
         ground_time = self.ground_time
@@ -89,17 +89,19 @@ class CalcTraj():
         y_vf = y_re * k_v
         z_vf = z_re * k_v
 
-        x_ = np.vstack([y_vf, x_vf]).T
-        y_ = np.vstack([groundtruth[1], groundtruth[2]]).T
+        x_ = np.vstack([y_vf, x_vf, z_vf]).T
+        y_ = np.vstack([groundtruth[1], groundtruth[2], groundtruth[3]]).T
+        y__ = y_.copy()
         x_ = x_ - x_.mean(axis=0)
         y_ = y_ - y_.mean(axis=0)
+        
         U, S, V = np.linalg.svd(x_.T @ y_)
         R = V.T @ U.T
         x_ = (R @ x_.T).T
 
         #x_[:, 0], x_[:, 1], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
         #y_vf-y_vf[0], x_vf-x_vf[0], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
-        return x_[:, 0] - x_[0, 0], x_[:, 1] - x_[0, 1], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
+        return x_[:, 0]+y__.mean(axis=0)[0], x_[:, 1]+y__.mean(axis=0)[1], z_vf+y__.mean(axis=0)[2], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
 
     @staticmethod
     def rotationMatrixToEulerAngles(self, R):
@@ -119,6 +121,10 @@ class CalcTraj():
         return np.array([-roll, -pitch, yaw])
     
     def calcOpensfm(self, groundtruth, json_file):
+        ground_time = self.ground_time
+        ground_data = self.ground_data
+        groundtruth = CalcTraj().calcGroundTruth(ground_time, Init().L0, ground_data)
+        
         time = self.Nx
         json_object = json.load(json_file)
         f = open('test_list.txt', 'r')
@@ -164,15 +170,15 @@ class CalcTraj():
             L_sfm = L_sfm + l_sfm[n]
             distance.append(L_sfm)
         k_sfm = groundtruth[0] / L_sfm
-        #y_ = np.vstack([groundtruth[2], groundtruth[3], groundtruth[4]]).T
+        y_ = np.vstack([groundtruth[2], groundtruth[1], groundtruth[3]]).T
         x_ = k_sfm*np.vstack([x_sfm[:], y_sfm[:], z_sfm[:]]).T  # colmap
-
+        y__ = y_.copy()
         x_ = x_ - x_.mean(axis=0)  # genten
-        #y_ = y_ - y_.mean(axis=0)
-        #U, S, V = np.linalg.svd(x_.T @ y_)
+        y_ = y_ - y_.mean(axis=0)
+        U, S, V = np.linalg.svd(x_.T @ y_)
         #U, S, V = np.linalg.svd(np.diff(np.diff(x_, axis=0), axis=0).T @ y_)
-        #R = V.T @ U.T
-        #x_ = (R @ x_.T).T
+        R = V.T @ U.T
+        x_ = (R @ x_.T).T
         r1 = np.zeros(len(name_data))
         p1 = np.zeros(len(name_data))
         ya1 = np.zeros(len(name_data))
@@ -185,7 +191,7 @@ class CalcTraj():
             p1[i] = eul[1] - 180
             ya1[i] = -eul[2]
         R_ = []
-        return x_[:, 0]-x_[:, 0][0], x_[:, 1]-x_[:, 1][0], r1, p1+90,ya1, t*k_sfm, R3,k_sfm*np.array(xyz), R_, x_[:, 2]-x_[:, 2][0], np.array(distance)*k_sfm
+        return x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], r1, p1+90,ya1, t*k_sfm, R3,k_sfm*np.array(xyz), R_, x_[:, 2]+y__.mean(axis=0)[2], np.array(distance)*k_sfm
 
     
     def calcDroidslam(self, groundtruth, L):

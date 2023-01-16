@@ -303,7 +303,8 @@ class OptimizeTraj():
             xyz_opt.append(np.array(t_opt[i]))
         
         x_ = np.vstack([np.array(xyz_opt).T[0], np.array(xyz_opt).T[1]]).T
-        y_ = np.vstack([self.groundtruth[1], self.groundtruth[2]]).T
+        y_ = np.vstack([self.groundtruth[2], self.groundtruth[1]]).T
+        y__ = y_.copy()
         x_ = x_ - x_.mean(axis=0)
         y_ = y_ - y_.mean(axis=0)
         U, S, V = np.linalg.svd(x_.T @ y_)
@@ -335,8 +336,10 @@ class OptimizeTraj():
             r1[i] = -eul[0]
             p1[i] = -eul[1]
             ya1[i] = -eul[2]
+
+        #np.array(xyz_opt)[:, 0], np.array(xyz_opt)[:, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
         #x_[:, 0]-x_[0, 0], x_[:, 1]-x_[0, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
-        return np.array(xyz_opt)[:, 0], np.array(xyz_opt)[:, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
+        return x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], np.array(xyz_opt)[:, 2],r1, p1,ya1
     
     
     
