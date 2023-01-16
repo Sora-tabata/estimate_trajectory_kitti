@@ -39,6 +39,24 @@ class CalcTraj():
             distance.append(L)
         return L, ground_points[0], ground_points[2], ground_points[1]
 
+    
+    @staticmethod
+    def rotationMatrixToEulerAngles(self, R):
+        sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
+
+        singular = sy < 1e-6
+
+        if not singular:
+            pitch = math.atan2(R[2, 1], R[2, 2])
+            roll = math.atan2(-R[2, 0], sy)
+            yaw = math.atan2(R[1, 0], R[0, 0])
+        else:
+            pitch = math.atan2(-R[1, 2], R[1, 1])
+            roll = math.atan2(-R[2, 0], sy)
+            yaw = 0
+
+        return np.array([-roll, -pitch, yaw])
+
     def calcOrbslam(self, groundtruth, L):
         ground_time = self.ground_time
         ground_data = self.ground_data
@@ -62,15 +80,48 @@ class CalcTraj():
             p1[i] = np.rad2deg(np.arcsin(2 * (q0[i] * q2[i] - q1[i] * q3[i])))
             ya1[i] = np.rad2deg(
                 np.arctan(2 * (q0[i] * q3[i] + q2[i] * q1[i]) / (q0[i] ** 2 + q1[i] ** 2 - q2[i] ** 2 - q3[i] ** 2)))
-        f1 = interpolate.interp1d(t_orb, r1, kind="linear", fill_value=(r1[0], r1[len(r1)-1]),bounds_error=False)#(r1[0], r1[len(r1)-1])
-        f2 = interpolate.interp1d(t_orb, ya1, kind="linear", fill_value=(ya1[0], ya1[len(ya1)-1]),bounds_error=False)
-        f3 = interpolate.interp1d(t_orb, p1, kind="linear", fill_value=(p1[0], p1[len(p1)-1]),bounds_error=False)
+        
+        q0_ = interpolate.interp1d(t_orb, L[:, 4], kind="linear",fill_value="extrapolate")(time)#7##5
+        q1_ = interpolate.interp1d(t_orb, L[:, 5], kind="linear",fill_value="extrapolate")(time)#6##6
+        q2_ = interpolate.interp1d(t_orb, L[:, 6], kind="linear",fill_value="extrapolate")(time)#4##7
+        q3_ = interpolate.interp1d(t_orb, L[:, 7], kind="linear",fill_value="extrapolate")(time)#5##4
+        
+        R = []
+        R_ = np.identity(3)
+        eul = []
+        for i in range(len(time)):
+            R.append([[q0_[i] ** 2 + q1_[i] ** 2 - q2_[i] ** 2 - q3_[i] ** 2, 2 * (q1_[i] * q2_[i] - q0_[i] * q3_[i]),
+                    2 * (q0_[i] * q2_[i] + q1_[i] * q3_[i])],
+                    [2 * (q0_[i] * q3_[i] + q1_[i] * q2_[i]), q0_[i] ** 2 - q1_[i] ** 2 + q2_[i] ** 2 - q3_[i] ** 2,
+                    2 * (-q0_[i] * q1_[i] + q2_[i] * q3_[i])],
+                    [2 * (q1_[i] * q3_[i] - q0_[i] * q2_[i]), 2 * (q2_[i] * q3_[i] + q0_[i] * q1_[i]),
+                    q0_[i] ** 2 - q1_[i] ** 2 - q2_[i] ** 2 + q3_[i] ** 2]])
+            eul.append([np.rad2deg(CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_) @ np.array(R[i])))])
+            R_ = R[i]
+        
+        r1 = np.zeros(self.n_frame)
+        p1 = np.zeros(self.n_frame)
+        ya1 = np.zeros(self.n_frame)
+        #角度の計算
+        print(np.array(eul).shape)
+        #R4 = R3 @ np.linalg.inv(R3)
+        for i in range(self.n_frame):
+            r1[i] = -np.array(eul[i]).T[0]
+            p1[i] = np.array(eul[i]).T[1]
+            ya1[i] = -np.array(eul[i]).T[2]
+
+        
+        
+        
+        #f1 = interpolate.interp1d(t_orb, r1, kind="linear", fill_value=(r1[0], r1[len(r1)-1]),bounds_error=False)#(r1[0], r1[len(r1)-1])
+        #f2 = interpolate.interp1d(t_orb, ya1, kind="linear", fill_value=(ya1[0], ya1[len(ya1)-1]),bounds_error=False)
+        #f3 = interpolate.interp1d(t_orb, p1, kind="linear", fill_value=(p1[0], p1[len(p1)-1]),bounds_error=False)
         f4 = interpolate.interp1d(t_orb, x_orb, kind="linear", fill_value="extrapolate")
         f5 = interpolate.interp1d(t_orb, y_orb, kind="linear", fill_value="extrapolate")
         f6 = interpolate.interp1d(t_orb, z_orb, kind="linear", fill_value="extrapolate")
-        r1_re = f1(time)
-        ya1_re = -f3(time)
-        p1_re = f2(time)
+        #r1_re = f1(time)
+        #ya1_re = -f3(time)
+        #p1_re = f2(time)
         
         x_re = f4(time)
         y_re = f5(time)
@@ -101,24 +152,7 @@ class CalcTraj():
 
         #x_[:, 0], x_[:, 1], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
         #y_vf-y_vf[0], x_vf-x_vf[0], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
-        return x_[:, 0]+y__.mean(axis=0)[0], x_[:, 1]+y__.mean(axis=0)[1], z_vf+y__.mean(axis=0)[2], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
-
-    @staticmethod
-    def rotationMatrixToEulerAngles(self, R):
-        sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
-
-        singular = sy < 1e-6
-
-        if not singular:
-            pitch = math.atan2(R[2, 1], R[2, 2])
-            roll = math.atan2(-R[2, 0], sy)
-            yaw = math.atan2(R[1, 0], R[0, 0])
-        else:
-            pitch = math.atan2(-R[1, 2], R[1, 1])
-            roll = math.atan2(-R[2, 0], sy)
-            yaw = 0
-
-        return np.array([-roll, -pitch, yaw])
+        return x_[:, 0]+y__.mean(axis=0)[0], x_[:, 1]+y__.mean(axis=0)[1], z_vf+y__.mean(axis=0)[2], r1, p1, ya1, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
     
     def calcOpensfm(self, groundtruth, json_file):
         ground_time = self.ground_time
