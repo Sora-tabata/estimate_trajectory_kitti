@@ -90,8 +90,9 @@ class Equalize():
             #print(data[0][0])
             if(len(data) == 0):
                 continue
-            elif (slam == 'ORBSLAM' and data[0][0] != 0):
-                continue
+            #elif (slam == 'ORBSLAM' and data[0][0] != 0):
+            #elif (slam == 'ORBSLAM'):
+            #    continue
             else:
                 L.append(data.tolist())
         #print(np.array(L).shape)
