@@ -5,7 +5,7 @@ conda activate droidenv
 
 
 #cd /home/sora-desktop/ORB_SLAM3
-dir_path="/home/sora-lab/dataset/03only/*"
+dir_path="/home/sora-lab/dataset/kitti/00/*"
 dirs=`find $dir_path -maxdepth 0 -type d`
 for i in `seq 0 9`;
 do
@@ -18,10 +18,8 @@ do
     cd /home/sora-lab/DROID-SLAM
     for dir in $dirs;
     do
-        python demo.py --imagedir=$dir/image_0 --calib=calib/03.txt --reconstruction_path=kitti --image_size=[375,1242] --stride=1 --disable_vis
-    done
-    for dir in $dirs;
-    do
+        python demo.py --imagedir=$dir/image_0 --calib=calib/00.txt --reconstruction_path=kitti --image_size=[376,1241] --stride=1 --disable_vis
+    
         cp /home/sora-lab/DROID-SLAM/reconstructions/kitti/tstamps.npy $dir/OUTPUT_DROIDSLAM/tstamps_$i.npy
         cp /home/sora-lab/DROID-SLAM/reconstructions/kitti/poses.npy $dir/OUTPUT_DROIDSLAM/poses_$i.npy
     done

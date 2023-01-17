@@ -267,9 +267,12 @@ class CalcTraj():
         for i in range(len(L)):
             xyz.append(-np.dot(np.array(R[i]).T, t[i]))
         xyz = np.array(xyz)
-        x_droid = interpolate.interp1d(t_orb*(1/14), xyz[:, 0], kind="linear",fill_value="extrapolate")(time)#7##5
-        y_droid = interpolate.interp1d(t_orb*(1/14), xyz[:, 1], kind="linear",fill_value="extrapolate")(time)#7##5
-        z_droid = interpolate.interp1d(t_orb*(1/14), xyz[:, 2], kind="linear",fill_value="extrapolate")(time)#7##5
+        new_t = []
+        for i in t_orb:
+            new_t.append(time[int(i)])
+        x_droid = interpolate.interp1d(new_t, xyz[:, 0], kind="linear",fill_value="extrapolate")(time)#7##5
+        y_droid = interpolate.interp1d(new_t, xyz[:, 1], kind="linear",fill_value="extrapolate")(time)#7##5
+        z_droid = interpolate.interp1d(new_t, xyz[:, 2], kind="linear",fill_value="extrapolate")(time)#7##5
         '''
         x_droid = xyz[:, 0]
         y_droid = xyz[:, 1]
@@ -287,14 +290,16 @@ class CalcTraj():
             L_sfm = L_sfm + l_sfm[n]
             distance.append(L_sfm)
         k_sfm = groundtruth[0] / L_sfm
-        #y_ = np.vstack([groundtruth[0][remainder::quotient], groundtruth[1][remainder::quotient], np.zeros(len(groundtruth[0][remainder::quotient]))]).T
+        y_ = np.vstack([groundtruth[2], groundtruth[1], groundtruth[3]]).T
+        y__ = y_.copy()
         x_ = k_sfm*np.vstack([z_droid[:], x_droid[:], y_droid[:]]).T  # colmap
         #x_ = k_sfm*np.vstack([z_droid[:], y_droid[:], x_droid[:]]).T
-        #x_ = x_ - x_.mean(axis=0)  # genten
-        #y_ = y_ - y_.mean(axis=0)
+        x_ = x_ - x_.mean(axis=0)  # genten
+        y_ = y_ - y_.mean(axis=0)
         #U, S, V = np.linalg.svd(np.diff(x_, axis=0).T @ np.diff(y_, axis=0))
-        #R = V.T @ U.T
-        #x_ = (R @ x_.T).T
+        U, S, V = np.linalg.svd(x_.T @ y_)
+        R = V.T @ U.T
+        x_ = (R @ x_.T).T
         #droid_x = interpolate.interp1d(t_orb*(1/14), x_[:, 0], kind="linear",fill_value="extrapolate")(time)#7##5
         #droid_y = interpolate.interp1d(t_orb*(1/14), x_[:, 1], kind="linear",fill_value="extrapolate")(time)#7##5
         q0 = L[:, 4]#7
@@ -310,11 +315,11 @@ class CalcTraj():
             p1[i] = np.rad2deg(np.arcsin(2 * (q0[i] * q2[i] - q1[i] * q3[i])))
             ya1[i] = np.rad2deg(
                 np.arctan(2 * (q0[i] * q3[i] + q2[i] * q1[i]) / (q0[i] ** 2 + q1[i] ** 2 - q2[i] ** 2 - q3[i] ** 2)))
-        f1 = interpolate.interp1d(t_orb*(1/14), r1, kind="linear", fill_value=(r1[0], r1[len(r1)-1]),bounds_error=False)#(r1[0], r1[len(r1)-1])
-        f2 = interpolate.interp1d(t_orb*(1/14), ya1, kind="linear", fill_value=(ya1[0], ya1[len(ya1)-1]),bounds_error=False)
-        f3 = interpolate.interp1d(t_orb*(1/14), p1, kind="linear", fill_value=(p1[0], p1[len(p1)-1]),bounds_error=False)
+        f1 = interpolate.interp1d(new_t, r1, kind="linear", fill_value=(r1[0], r1[len(r1)-1]),bounds_error=False)#(r1[0], r1[len(r1)-1])
+        f2 = interpolate.interp1d(new_t, ya1, kind="linear", fill_value=(ya1[0], ya1[len(ya1)-1]),bounds_error=False)
+        f3 = interpolate.interp1d(new_t, p1, kind="linear", fill_value=(p1[0], p1[len(p1)-1]),bounds_error=False)
         r1_re = -f1(time)
         ya1_re = f3(time)
         p1_re = -f2(time)
-        return -(x_[:, 0]-x_[:, 0][0]), x_[:, 1]-x_[:, 1][0], x_[:, 2]-x_[:, 2][0],r1_re, p1_re, ya1_re, t_*k_sfm, t__*k_sfm, R3, x_, np.array(distance)*k_sfm
+        return x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]-y__.mean(axis=0)[2],r1_re, p1_re, ya1_re, t_*k_sfm, t__*k_sfm, R3, x_, np.array(distance)*k_sfm
 
