@@ -103,7 +103,7 @@ class CalcTraj():
         p1 = np.zeros(self.n_frame)
         ya1 = np.zeros(self.n_frame)
         #角度の計算
-        print(np.array(eul).T[0])
+        #print(np.array(eul).T[0])
         #R4 = R3 @ np.linalg.inv(R3)
         r1_ = np.cumsum(np.array(eul).T[0])
         p1_ = np.cumsum(np.array(eul).T[1])
