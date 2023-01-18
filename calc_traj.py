@@ -96,7 +96,7 @@ class CalcTraj():
                     2 * (-q0_[i] * q1_[i] + q2_[i] * q3_[i])],
                     [2 * (q1_[i] * q3_[i] - q0_[i] * q2_[i]), 2 * (q2_[i] * q3_[i] + q0_[i] * q1_[i]),
                     q0_[i] ** 2 - q1_[i] ** 2 - q2_[i] ** 2 + q3_[i] ** 2]])
-            eul.append([np.rad2deg(CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_) @ np.array(R[i])))])
+            eul.append([CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_).T @ np.array(R[i]))])
             R_ = R[i]
         
         r1 = np.zeros(self.n_frame)
@@ -105,11 +105,11 @@ class CalcTraj():
         #角度の計算
         #print(np.array(eul).T[0])
         #R4 = R3 @ np.linalg.inv(R3)
-        r1_ = np.cumsum(np.array(eul).T[0])
-        p1_ = np.cumsum(np.array(eul).T[1])
-        ya1_ = np.cumsum(np.array(eul).T[2])
+        r1_ = np.rad2deg(np.cumsum(np.array(eul).T[0]))
+        p1_ = np.rad2deg(np.cumsum(np.array(eul).T[1]))
+        ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
         for i in range(self.n_frame):
-            r1[i] = -r1_[i]
+            r1[i] = r1_[i]
             p1[i] = p1_[i]
             ya1[i] = ya1_[i]
 
