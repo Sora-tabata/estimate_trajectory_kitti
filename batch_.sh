@@ -1,17 +1,24 @@
 #!/bin/sh
 
 
-dir_path="/home/sora-lab/dataset/kitti/00/*"
-dirs=`find $dir_path -maxdepth 0 -type d`
-for dir in $dirs;
+dir_path="/home/sora-lab/dataset/kitti/*"
+dirs_=`find $dir_path -maxdepth 0 -type d`
+for dir in $dirs_;
 do
-    #cp -r $dir/images $dir/image_0
-    cd $dir
-    cp -r $dir/images $dir/image_1
-    sudo rm -rf $dir/image_0
-    cp -r $dir/image_1 $dir/image_0
-    cd $dir/image_0
-    python /home/sora-lab/Documents/estimate_trajectory_kitti/rename.py
+    dir_path=`echo "$dir/*"`
+    dirs=`find $dir_path -maxdepth 0 -type d`
+    for dir in $dirs;
+    do
+        echo $dir
+        cd $dir
+        CURRENT=$(cd $(dirname $0);pwd)
+        DIR_NAME=`echo "$CURRENT" | sed -e 's/.*\/\([^\/]*\)$/\1/'`
+        echo $DIR_NAME
+        cd $dir
+        cd $dir/images
+        python /home/sora-lab/Documents/estimate_trajectory_kitti/rename.py
+        cp -r $dir/images $dir/image_0
+    done
 done
 '''
 for i in `seq 0 9`;
