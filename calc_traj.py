@@ -109,9 +109,9 @@ class CalcTraj():
         p1_ = np.rad2deg(np.cumsum(np.array(eul).T[1]))
         ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
         for i in range(self.n_frame):
-            r1[i] = r1_[i]
-            p1[i] = p1_[i]
-            ya1[i] = ya1_[i]
+            r1[i] = -p1_[i]
+            p1[i] = -(ya1_[i] - 180)
+            ya1[i] = r1_[i]
 
         
         
@@ -149,13 +149,16 @@ class CalcTraj():
         x_ = x_ - x_.mean(axis=0)
         y_ = y_ - y_.mean(axis=0)
         
-        U, S, V = np.linalg.svd(x_.T @ y_)
-        R = V.T @ U.T
+        U, S, VT = np.linalg.svd(y_.T @ x_)
+        R__ = U @ VT
+        R_det = np.linalg.det(R__)
+        sigma = np.array([[1, 0, 0], [0, 1, 0], [0, 0, R_det]])
+        R = U @ sigma @ VT
         x_ = (R @ x_.T).T
 
         #x_[:, 0], x_[:, 1], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
         #y_vf-y_vf[0], x_vf-x_vf[0], z_vf-z_vf[0], r1_re, p1_re, ya1_re, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
-        return x_[:, 0]+y__.mean(axis=0)[0], x_[:, 1]+y__.mean(axis=0)[1], z_vf+y__.mean(axis=0)[2], r1, p1, ya1, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
+        return x_[:, 0]+y__.mean(axis=0)[0], x_[:, 1]+y__.mean(axis=0)[1], x_[:, 2]+y__.mean(axis=0)[2], r1, p1, ya1, t_orb, x_re, y_re, z_re, k_v, np.array(distance)*k_v
     
     def calcOpensfm(self, groundtruth, json_file):
         ground_time = self.ground_time
@@ -212,9 +215,13 @@ class CalcTraj():
         y__ = y_.copy()
         x_ = x_ - x_.mean(axis=0)  # genten
         y_ = y_ - y_.mean(axis=0)
-        U, S, V = np.linalg.svd(x_.T @ y_)
-        #U, S, V = np.linalg.svd(np.diff(np.diff(x_, axis=0), axis=0).T @ y_)
-        R = V.T @ U.T
+
+
+        U, S, VT = np.linalg.svd(y_.T @ x_)
+        R__ = U @ VT
+        R_det = np.linalg.det(R__)
+        sigma = np.array([[1, 0, 0], [0, 1, 0], [0, 0, R_det]])
+        R = U @ sigma @ VT
         x_ = (R @ x_.T).T
         r1 = np.zeros(len(name_data))
         p1 = np.zeros(len(name_data))
@@ -296,30 +303,46 @@ class CalcTraj():
         #x_ = k_sfm*np.vstack([z_droid[:], y_droid[:], x_droid[:]]).T
         x_ = x_ - x_.mean(axis=0)  # genten
         y_ = y_ - y_.mean(axis=0)
-        #U, S, V = np.linalg.svd(np.diff(x_, axis=0).T @ np.diff(y_, axis=0))
-        U, S, V = np.linalg.svd(x_.T @ y_)
-        R = V.T @ U.T
+        U, S, VT = np.linalg.svd(y_.T @ x_)
+        R__ = U @ VT
+        R_det = np.linalg.det(R__)
+        sigma = np.array([[1, 0, 0], [0, 1, 0], [0, 0, R_det]])
+        R = U @ sigma @ VT
         x_ = (R @ x_.T).T
         #droid_x = interpolate.interp1d(t_orb*(1/14), x_[:, 0], kind="linear",fill_value="extrapolate")(time)#7##5
         #droid_y = interpolate.interp1d(t_orb*(1/14), x_[:, 1], kind="linear",fill_value="extrapolate")(time)#7##5
-        q0 = L[:, 4]#7
-        q1 = L[:, 5]#6
-        q2 = L[:, 6]#4
-        q3 = L[:, 7]#5
-        r1 = np.zeros(len(q0))
-        p1 = np.zeros(len(q0))
-        ya1 = np.zeros(len(q0))
-        for i in range(len(q0)):
-            r1[i] = np.rad2deg(
-                np.arctan(2 * (q0[i] * q1[i] + q2[i] * q3[i]) / (q0[i] ** 2 - q1[i] ** 2 - q2[i] ** 2 + q3[i] ** 2)))
-            p1[i] = np.rad2deg(np.arcsin(2 * (q0[i] * q2[i] - q1[i] * q3[i])))
-            ya1[i] = np.rad2deg(
-                np.arctan(2 * (q0[i] * q3[i] + q2[i] * q1[i]) / (q0[i] ** 2 + q1[i] ** 2 - q2[i] ** 2 - q3[i] ** 2)))
-        f1 = interpolate.interp1d(new_t, r1, kind="linear", fill_value=(r1[0], r1[len(r1)-1]),bounds_error=False)#(r1[0], r1[len(r1)-1])
-        f2 = interpolate.interp1d(new_t, ya1, kind="linear", fill_value=(ya1[0], ya1[len(ya1)-1]),bounds_error=False)
-        f3 = interpolate.interp1d(new_t, p1, kind="linear", fill_value=(p1[0], p1[len(p1)-1]),bounds_error=False)
-        r1_re = -f1(time)
-        ya1_re = f3(time)
-        p1_re = -f2(time)
-        return x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]-y__.mean(axis=0)[2],r1_re, p1_re, ya1_re, t_*k_sfm, t__*k_sfm, R3, x_, np.array(distance)*k_sfm
+
+        q0_ = interpolate.interp1d(t_orb, L[:, 4], kind="linear",fill_value="extrapolate")(time)#7##5
+        q1_ = interpolate.interp1d(t_orb, L[:, 5], kind="linear",fill_value="extrapolate")(time)#6##6
+        q2_ = interpolate.interp1d(t_orb, L[:, 6], kind="linear",fill_value="extrapolate")(time)#4##7
+        q3_ = interpolate.interp1d(t_orb, L[:, 7], kind="linear",fill_value="extrapolate")(time)#5##4
+        
+        R = []
+        R_ = np.identity(3)
+        eul = []
+        for i in range(len(time)):
+            R.append([[q0_[i] ** 2 + q1_[i] ** 2 - q2_[i] ** 2 - q3_[i] ** 2, 2 * (q1_[i] * q2_[i] - q0_[i] * q3_[i]),
+                    2 * (q0_[i] * q2_[i] + q1_[i] * q3_[i])],
+                    [2 * (q0_[i] * q3_[i] + q1_[i] * q2_[i]), q0_[i] ** 2 - q1_[i] ** 2 + q2_[i] ** 2 - q3_[i] ** 2,
+                    2 * (-q0_[i] * q1_[i] + q2_[i] * q3_[i])],
+                    [2 * (q1_[i] * q3_[i] - q0_[i] * q2_[i]), 2 * (q2_[i] * q3_[i] + q0_[i] * q1_[i]),
+                    q0_[i] ** 2 - q1_[i] ** 2 - q2_[i] ** 2 + q3_[i] ** 2]])
+            eul.append([CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_).T @ np.array(R[i]))])
+            R_ = R[i]
+        
+        r1 = np.zeros(self.n_frame)
+        p1 = np.zeros(self.n_frame)
+        ya1 = np.zeros(self.n_frame)
+        #角度の計算
+        #print(np.array(eul).T[0])
+        #R4 = R3 @ np.linalg.inv(R3)
+        r1_ = np.rad2deg(np.cumsum(np.array(eul).T[0]))
+        p1_ = np.rad2deg(np.cumsum(np.array(eul).T[1]))
+        ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
+        for i in range(self.n_frame):
+            r1[i] = -p1_[i]
+            p1[i] = -(ya1_[i] - 180)
+            ya1[i] = r1_[i]
+        
+        return x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]-y__.mean(axis=0)[2],r1, p1, ya1, t_*k_sfm, t__*k_sfm, R3, x_, np.array(distance)*k_sfm
 
