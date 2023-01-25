@@ -110,7 +110,7 @@ class CalcTraj():
         ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
         for i in range(self.n_frame):
             r1[i] = -p1_[i]
-            p1[i] = -(ya1_[i] - 180)
+            p1[i] = ya1_[i] - 180
             ya1[i] = r1_[i]
 
         

@@ -24,6 +24,7 @@ do
     CURRENT=$(cd $(dirname $0);pwd)
     DIR_NAME=`echo "$CURRENT" | sed -e 's/.*\/\([^\/]*\)$/\1/'`
     echo $DIR_NAME
+    rm -rf /home/sora-desktop/Desktop/png/$DIR_NAME
     cp $dir/output/opted/trajectory.png /home/sora-desktop/Desktop/tra/$DIR_NAME.png
     cp -r $dir/output/opted /home/sora-desktop/Desktop/png/$DIR_NAME
 done

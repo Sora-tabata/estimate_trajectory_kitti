@@ -71,9 +71,9 @@ class CalcRT():
             r1[i] = -eul[0]
             p1[i] = -eul[1]
             ya1[i] = -eul[2]
-            #print(roll[i], r1[i], "roll")
-            #print(pitch[i], p1[i], "pitch")
-            #print(yaw[i], ya1[i], "yaw")
+            print(roll[i], r1[i], "roll")
+            print(pitch[i], p1[i], "pitch")
+            print(yaw[i], ya1[i], "yaw")
         t = np.vstack([x, y, z]).T
         RT = []
         v_sum = []

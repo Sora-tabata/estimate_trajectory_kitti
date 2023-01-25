@@ -291,7 +291,7 @@ class OptimizeTraj():
                     
         #print(R_r[0])
         #print(v_sfm_r, v_slam)
-        return R_r, t , t_sfm, t_slam#R_r, t, t_sfm, t_slam
+        return R_sfm_r, t_sfm , t_sfm, t_slam#R_r, t, t_sfm, t_slam
 
     def calcOptimizeTraj(self):
         xyz_opt = []
