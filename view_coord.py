@@ -25,14 +25,14 @@ class ViewCoord():
     
     def showTrajectory(self, groundtruth, opensfm, orbslam, droidslam, optimized, equalizedORB, equalizedDROID):
         plt.rcParams['font.family'] = 'Times New Roman'
-        fig, traj = plt.subplots(figsize=(32, 32))
-        traj.scatter(groundtruth[1], groundtruth[2], color="black", s=0.4, label="Ground Truth")
-        traj.scatter(opensfm[0], opensfm[1], color="red", s=0.4, label="OpenSfM")
-        traj.scatter(orbslam[0], orbslam[1], color="green", s=0.4, label="ORB-SLAM2")
-        traj.scatter(droidslam[0], droidslam[1], color="blue", s=0.4, label="DROID-SLAM")
-        traj.scatter(optimized[0], optimized[1], color="magenta", s=0.4, label="Optimized")
-        traj.scatter(equalizedORB[0], equalizedORB[1], color="lightgreen", s=0.4, label="equalized ORB-SLAM2")
-        traj.scatter(equalizedDROID[0], equalizedDROID[1], color="cyan", s=0.4, label="equalized DROID-SLAM")
+        fig, traj = plt.subplots()
+        traj.scatter(groundtruth[1], groundtruth[2], color="black", s=0.7, label="Ground Truth")
+        traj.scatter(opensfm[0], opensfm[1], color="red", s=0.7, label="OpenSfM")
+        traj.scatter(orbslam[0], orbslam[1], color="green", s=0.7, label="ORB-SLAM2")
+        traj.scatter(droidslam[0], droidslam[1], color="blue", s=0.7, label="DROID-SLAM")
+        traj.scatter(optimized[0], optimized[1], color="magenta", s=1, label="Integrated")
+        #traj.scatter(equalizedORB[0], equalizedORB[1], color="lightgreen", s=0.4, label="equalized ORB-SLAM2")
+        #traj.scatter(equalizedDROID[0], equalizedDROID[1], color="cyan", s=0.4, label="equalized DROID-SLAM")
         traj.set_aspect('equal')
         traj.legend(fancybox=False, shadow=False, edgecolor='black')
         traj.set_ylabel("Depth direction [m]")

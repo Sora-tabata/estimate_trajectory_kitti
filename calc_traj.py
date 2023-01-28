@@ -312,23 +312,23 @@ class CalcTraj():
         #droid_x = interpolate.interp1d(t_orb*(1/14), x_[:, 0], kind="linear",fill_value="extrapolate")(time)#7##5
         #droid_y = interpolate.interp1d(t_orb*(1/14), x_[:, 1], kind="linear",fill_value="extrapolate")(time)#7##5
 
-        q0_ = interpolate.interp1d(t_orb, L[:, 4], kind="linear",fill_value="extrapolate")(time)#7##5
-        q1_ = interpolate.interp1d(t_orb, L[:, 5], kind="linear",fill_value="extrapolate")(time)#6##6
-        q2_ = interpolate.interp1d(t_orb, L[:, 6], kind="linear",fill_value="extrapolate")(time)#4##7
-        q3_ = interpolate.interp1d(t_orb, L[:, 7], kind="linear",fill_value="extrapolate")(time)#5##4
+        q0_ = interpolate.interp1d(t_orb, L[:, 5], kind="linear",fill_value="extrapolate")(time)#7##5
+        q1_ = interpolate.interp1d(t_orb, L[:, 6], kind="linear",fill_value="extrapolate")(time)#6##6
+        q2_ = interpolate.interp1d(t_orb, L[:, 7], kind="linear",fill_value="extrapolate")(time)#4##7
+        q3_ = interpolate.interp1d(t_orb, L[:, 4], kind="linear",fill_value="extrapolate")(time)#5##4
         
-        R = []
+        R1 = []
         R_ = np.identity(3)
         eul = []
         for i in range(len(time)):
-            R.append([[q0_[i] ** 2 + q1_[i] ** 2 - q2_[i] ** 2 - q3_[i] ** 2, 2 * (q1_[i] * q2_[i] - q0_[i] * q3_[i]),
+            R1.append([[q0_[i] ** 2 + q1_[i] ** 2 - q2_[i] ** 2 - q3_[i] ** 2, 2 * (q1_[i] * q2_[i] - q0_[i] * q3_[i]),
                     2 * (q0_[i] * q2_[i] + q1_[i] * q3_[i])],
                     [2 * (q0_[i] * q3_[i] + q1_[i] * q2_[i]), q0_[i] ** 2 - q1_[i] ** 2 + q2_[i] ** 2 - q3_[i] ** 2,
                     2 * (-q0_[i] * q1_[i] + q2_[i] * q3_[i])],
                     [2 * (q1_[i] * q3_[i] - q0_[i] * q2_[i]), 2 * (q2_[i] * q3_[i] + q0_[i] * q1_[i]),
                     q0_[i] ** 2 - q1_[i] ** 2 - q2_[i] ** 2 + q3_[i] ** 2]])
-            eul.append([CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_).T @ np.array(R[i]))])
-            R_ = R[i]
+            eul.append([CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_).T @ np.array(R1[i]))])
+            R_ = R1[i]
         
         r1 = np.zeros(self.n_frame)
         p1 = np.zeros(self.n_frame)
