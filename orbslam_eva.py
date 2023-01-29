@@ -35,6 +35,19 @@ def get_coo(data):
 		points[2].append(data[num][12])
 	return points
 
+def get_R(data):
+	R = [[[], [], []], [[], [], []],[[], [], []]]
+	for num in range(len(data)):
+		R[0][0].append(data[num][1])
+		R[0][1].append(data[num][2])
+		R[0][2].append(data[num][3])
+		R[1][0].append(data[num][5])
+		R[1][1].append(data[num][6])
+		R[1][2].append(data[num][7])
+		R[2][0].append(data[num][9])
+		R[2][1].append(data[num][10])
+		R[2][2].append(data[num][11])
+	return R
 
 def get_points(data):
 	points = [[],[],[]]

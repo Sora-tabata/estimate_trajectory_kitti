@@ -23,6 +23,7 @@ class Init():
         self.Nx  = self.ground_time
         #self.day = np.loadtxt(glob.glob('ID*')[0], encoding="shift-jis", dtype="unicode", delimiter=',', skiprows=2, usecols=[27])[0].replace('/', '-')
         #self.time = np.loadtxt(glob.glob('ID*')[0], encoding="shift-jis", dtype="unicode", delimiter=',', skiprows=2, usecols=[16, 17, 18, 19])
+        #print(np.load('tstamps.npy'))
         self.droid = np.vstack([np.load('tstamps.npy').T, np.load('poses.npy').T]).T
 
         self.L0 = np.loadtxt('OUTPUT_ORBSLAM/0.txt', delimiter=' ')

@@ -131,7 +131,7 @@ class OptimizeTraj():
         '''
         RT = []
         for i in range(len(output[3])):
-            RT.append(output[3][i] + 1.0)
+            RT.append(output[3][i])
         return t_sfm_new, R_sfm__, v_sfm, RT
 
 
@@ -156,7 +156,7 @@ class OptimizeTraj():
             #Q_sfm.append(R_sfm[i+1] @ np.linalg.inv(R_sfm[i]))
             if (i == 0):
                 #Q_sfm.append(np.array(R_sfm_r[i]))
-                Q_sfm_r.append(np.array(CalcRT().euler2RotationMatrix(np.deg2rad(np.zeros(Init().n_frame)), np.deg2rad(np.zeros(Init().n_frame)), np.deg2rad(np.zeros(Init().n_frame))))[i])
+                Q_sfm_r.append(np.array(R_sfm_r[i]))
                 #print(Q_sfm_r, "i=0")
                 #Q_slam.append(np.array(R_slam[i]))
                 Q_slam_r.append(np.array(R_slam_r[i]))
@@ -242,10 +242,9 @@ class OptimizeTraj():
         for i,j in zip(self.time, list[1:]):
             if (j == 1):
                     #R_r[j-1] = np.array(Q_sfm_r[j-1])
-                    R_r[j-1] = np.array(Q_sfm_r[j-1])
-                    t[j-1] = np.array(v_slam[j-1])
-                    #R_r[j-1] = np.array(R_sfm_r[j-1])
-                    #print(R, "j==1")
+                    #t[j-1] = np.array(v_slam[j-1])
+                    R_r[j-1] = np.array(np.eye(3))
+                    t[j-1] = np.array(np.zeros(3))
             else:
                 if (self.t_orb[0] >= i ): #self.t_orb[len(self.t_orb)-1] > i
                     if (RT_sfm[j-1] <= RT_droid[j-1]):
@@ -260,7 +259,7 @@ class OptimizeTraj():
                     if (RT_sfm[j-1] <= RT_droid[j-1]):
                     #R[j-1] = np.array(Q_sfm[j-1]) @ np.array(R[j-2])
                         R_r[j-1] = np.array(Q_sfm_r[j-1]) @ np.array(R_r[j-2])
-                        t[j-1] = np.array(t[j-2]) + np.array(R_sfm_r[j-1]) @ np.array(v_sfm_r[j-1])
+                        t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_sfm_r[j-1])
                     else:
                         R_r[j-1] = np.array(Q_droid_r[j-1]) @ np.array(R_r[j-2])
                         t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_droid[j-1])
