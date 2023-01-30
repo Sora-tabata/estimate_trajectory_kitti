@@ -110,14 +110,15 @@ class CalcRT():
         fig, rt = plt.subplots(figsize=(32, 8))
         RT_sfm = self.calcRT(self.opensfm[0], self.opensfm[1], self.opensfm[9], self.opensfm[4], self.opensfm[3], self.opensfm[2])[3]
         RT_droidslam = self.calcRT(self.droidslam[0], self.droidslam[1], self.droidslam[2], self.droidslam[3], self.droidslam[4], self.droidslam[5])[3]
-        if (len(Init().L0) == 0):
-            RT_orbslam = RT_droidslam
-        else:
-            RT_orbslam = self.calcRT(self.orbslam[0], self.orbslam[1], self.orbslam[2], self.orbslam[3], self.orbslam[4], self.orbslam[5])[3]
-        #RT_droidslam = self.calc_RT_only_droid()[0]
-        
+        RT_orbslam = self.calcRT(self.orbslam[0], self.orbslam[1], self.orbslam[2], self.orbslam[3], self.orbslam[4], self.orbslam[5])[3]
+        RT_orbslam_ = []
+        for i in RT_orbslam:
+            if (np.isnan(i)):
+                RT_orbslam_.append(10)
+            else:
+                RT_orbslam_.append(i)
         rt.plot(time[:], np.array(RT_sfm).T, color="red", lw=2, label="Normalized vehicle attitude from OpenSfM")
-        rt.plot(time[:], np.array(RT_orbslam).T, color="green", lw=2, label="Normalized vehicle attitude from ORB-SLAM2")
+        rt.plot(time[:], np.array(RT_orbslam_).T, color="green", lw=2, label="Normalized vehicle attitude from ORB-SLAM2")
         rt.plot(time[:], np.array(RT_droidslam).T, color="blue", lw=2, label="Normalized vehicle attitude from DROID-SLAM")
         rt.legend(fancybox=False, shadow=False, edgecolor='black')
         rt.set_xlabel("Time [s]")

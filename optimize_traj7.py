@@ -178,7 +178,6 @@ class OptimizeTraj():
         rotateDroid = self.rotateDroid()
         Q = self.calcQ()
         RT_sfm = np.array(rotateSfM[3])
-        #RT_slam = np.array(self.RTonly[0])
         RT_slam_ = np.array(self.output[3])
         RT_slam = []
         #print(RT_slam_, "before")
@@ -221,10 +220,10 @@ class OptimizeTraj():
         for i,j in zip(self.time, list[1:]):
             if (j == 1):
                 #R_slam[j-1] = np.array(Q_slam[j-1])
-                R_slam_r[j-1] = np.array(Q_slam_r[j-1])
+                R_slam_r[j-1] = np.array(np.eye(3))
                 #R_sfm[j-1] = np.array(Q_sfm[j-1])
-                R_sfm_r[j-1] = np.array(Q_sfm_r[j-1])
-                R_droid_r[j-1] = np.array(Q_droid_r[j-1])
+                R_sfm_r[j-1] = np.array(np.eye(3))
+                R_droid_r[j-1] = np.array(np.eye(3))
             else:
                 #R_slam[j-1] = np.array(Q_slam[j-1]) @ np.array(R_slam[j-2])
                 R_slam_r[j-1] = np.array(Q_slam_r[j-1]) @ np.array(R_slam_r[j-2])
@@ -238,7 +237,7 @@ class OptimizeTraj():
                 t_droid[j-1] = np.array(t_droid[j-2]) + np.array(R_droid_r[j-1]) @ np.array(v_droid[j-1])
                 
 
-        #print("R[0]=", R_sfm[0])
+        #print(RT_slam)
         for i,j in zip(self.time, list[1:]):
             if (j == 1):
                     #R_r[j-1] = np.array(Q_sfm_r[j-1])
@@ -246,6 +245,7 @@ class OptimizeTraj():
                     R_r[j-1] = np.array(np.eye(3))
                     t[j-1] = np.array(np.zeros(3))
             else:
+                '''
                 if (self.t_orb[0] >= i ): #self.t_orb[len(self.t_orb)-1] > i
                     if (RT_sfm[j-1] <= RT_droid[j-1]):
                     #[j-1] = np.array(Q_sfm[j-1]) @ np.array(R[j-2])
@@ -263,30 +263,18 @@ class OptimizeTraj():
                     else:
                         R_r[j-1] = np.array(Q_droid_r[j-1]) @ np.array(R_r[j-2])
                         t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_droid[j-1])
+                
                 else:
-                    if (RT_sfm[j-1] <= RT_slam[j-1] and RT_sfm[j-1] <= RT_droid[j-1]):
-                        #R[j-1] = np.array(Q_sfm[j-1]) @ np.array(R[j-2])
-                        R_r[j-1] = np.array(Q_sfm_r[j-1]) @ np.array(R_r[j-2])
-                        t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_sfm_r[j-1])
-                    elif (RT_droid[j-1] <= RT_slam[j-1] and RT_droid[j-1] <= RT_sfm[j-1]):
-                        R_r[j-1] = np.array(Q_droid_r[j-1]) @ np.array(R_r[j-2])
-                        t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_droid[j-1])
-                    else:
-                        #R[j-1] = np.array(Q_slam[j-1]) @ np.array(R[j-2])
-                        R_r[j-1] = np.array(Q_slam_r[j-1]) @ np.array(R_r[j-2])
-                        t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_slam[j-1])
-                #elif (self.t_orb[len(self.t_orb)-1] > i):
-                #    if (RT_sfm[j-1] < RT_slam[j-1] and RT_sfm[j-1] < RT_droid[j-1]):
-                #        #R[j-1] = np.array(Q_sfm[j-1]) @ np.array(R[j-2])
-                #        R_r[j-1] = np.array(Q_sfm_r[j-1]) @ np.array(R_r[j-2])
-                #        t[j-1] = np.array(t[j-2]) + np.array(R_sfm_r[j-1]) @ np.array(v_sfm_r[j-1])
-                #    elif (RT_droid[j-1] < RT_slam[j-1] and RT_droid[j-1] < RT_sfm[j-1]):
-                #        R_r[j-1] = np.array(Q_droid_r[j-1]) @ np.array(R_r[j-2])
-                #        t[j-1] = np.array(t[j-2]) + np.array(R_droid_r[j-1]) @ np.array(v_droid[j-1])
-                #    else:
-                #        #R[j-1] = np.array(Q_slam[j-1]) @ np.array(R[j-2])
-                #        R_r[j-1] = np.array(Q_slam_r[j-1]) @ np.array(R_r[j-2])
-                #        t[j-1] = np.array(t[j-2]) + np.array(R_slam_r[j-1]) @ np.array(v_slam[j-1])
+                '''
+                if (RT_slam[j-1] < RT_sfm[j-1] and RT_slam[j-1] < RT_droid[j-1]):
+                    R_r[j-1] = np.array(Q_slam_r[j-1]) @ np.array(R_r[j-2])
+                    t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_slam[j-1])
+                elif (RT_droid[j-1] < RT_slam[j-1] and RT_droid[j-1] < RT_sfm[j-1]):
+                    R_r[j-1] = np.array(Q_droid_r[j-1]) @ np.array(R_r[j-2])
+                    t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_droid[j-1])
+                else:
+                    R_r[j-1] = np.array(Q_sfm_r[j-1]) @ np.array(R_r[j-2])
+                    t[j-1] = np.array(t[j-2]) + np.array(R_r[j-1]) @ np.array(v_sfm_r[j-1])
                     
         #print(R_r[0])
         #print(v_sfm_r, v_slam)
@@ -302,6 +290,7 @@ class OptimizeTraj():
             xyz_opt.append(np.array(t_opt[i]))
         
         x_ = np.vstack([np.array(xyz_opt).T[1], np.array(xyz_opt).T[0], np.array(xyz_opt).T[2]]).T
+        x__ = x_.copy()
         y_ = np.vstack([self.groundtruth[2], self.groundtruth[1], self.groundtruth[3]]).T
         y__ = y_.copy()
         x_ = x_ - x_.mean(axis=0)
@@ -339,8 +328,7 @@ class OptimizeTraj():
             p1[i] = -eul[1]
             ya1[i] = -eul[2]
 
-        #np.array(xyz_opt)[:, 0], np.array(xyz_opt)[:, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
-        #x_[:, 0]-x_[0, 0], x_[:, 1]-x_[0, 1], np.array(xyz_opt)[:, 2],r1, p1,ya1
+
         return x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]+y__.mean(axis=0)[2],r1, p1,ya1
     
     
