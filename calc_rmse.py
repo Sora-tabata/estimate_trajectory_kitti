@@ -54,7 +54,7 @@ class CalcRMSE():
         rmse_droid_y = mean_absolute_error(self.droidslam[12], self.groundtruth[2])
         rmse_opt_x = mean_absolute_error(self.optimized[0], self.groundtruth[1])
         rmse_opt_y = mean_absolute_error(self.optimized[1], self.groundtruth[2])
-
+        ##
         rmse_orb = (rmse_orb_x + rmse_orb_y)/2
         rmse_sfm = (rmse_sfm_x + rmse_sfm_y)/2
         rmse_droid = (rmse_droid_x + rmse_droid_y)/2
