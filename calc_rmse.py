@@ -114,25 +114,25 @@ class CalcRMSE():
         pitch = [[cwd, rmse_orb_pitch, rmse_sfm_pitch, rmse_droid_pitch, rmse_opt_pitch]]
         yaw = [[cwd, rmse_orb_yaw, rmse_sfm_yaw, rmse_droid_yaw, rmse_opt_yaw]]
 
-        f1 = open('/home/sora-desktop/Desktop/kitti_csv/tra.csv', mode="a", newline="")
+        f1 = open('/home/sora-lab/Desktop/kitti_csv/tra.csv', mode="a", newline="")
         writer1 = csv.writer(f1)
         for data in tra:
             writer1.writerow(data)
         f1.close()
 
-        f2 = open('/home/sora-desktop/Desktop/kitti_csv/roll.csv', mode="a", newline="")
+        f2 = open('/home/sora-lab/Desktop/kitti_csv/roll.csv', mode="a", newline="")
         writer2 = csv.writer(f2)
         for data in roll:
             writer2.writerow(data)
         f2.close()
 
-        f3 = open('/home/sora-desktop/Desktop/kitti_csv/pitch.csv', mode="a", newline="")
+        f3 = open('/home/sora-lab/Desktop/kitti_csv/pitch.csv', mode="a", newline="")
         writer3 = csv.writer(f3)
         for data in pitch:
             writer3.writerow(data)
         f3.close()
 
-        f4 = open('/home/sora-desktop/Desktop/kitti_csv/yaw.csv', mode="a", newline="")
+        f4 = open('/home/sora-lab/Desktop/kitti_csv/yaw.csv', mode="a", newline="")
         writer4 = csv.writer(f4)
         for data in yaw:
             writer4.writerow(data)
