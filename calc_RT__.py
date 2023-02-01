@@ -105,7 +105,7 @@ class CalcRT():
         return t, v_sfm, R, RT
 
     
-    def showRT(self):
+    def showRT2(self):
         time = Init().Nx
         fig, rt = plt.subplots(figsize=(32, 8))
         RT_sfm = self.calcRT(self.opensfm[0], self.opensfm[1], self.opensfm[9], self.opensfm[4], self.opensfm[3], self.opensfm[2])[3]
@@ -125,5 +125,5 @@ class CalcRT():
         rt.set_ylabel("Normalized vehicle attitude")
         plt.grid(True)
         #plt.ylim(0, 0.6)
-        plt.savefig('output/opted/RT.png')
+        #plt.savefig('output/opted/RT.png')
         #plt.show()

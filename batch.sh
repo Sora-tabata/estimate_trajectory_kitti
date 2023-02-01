@@ -60,6 +60,6 @@ do
         #cp $dir/OUTPUT_ORBSLAM/0.txt $dir/KeyFrameTrajectory.txt
         #cp $dir/OUTPUT_DROIDSLAM/poses_0.npy $dir/poses.npy
         #cp $dir/OUTPUT_DROIDSLAM/tstamps_0.npy $dir/tstamps.npy
-        python /home/sora-lab/Documents/estimate_trajectory_kitti/calc_rmse.py
+        #python /home/sora-lab/Documents/estimate_trajectory_kitti/calc_rmse.py
     done
 done

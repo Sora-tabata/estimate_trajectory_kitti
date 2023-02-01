@@ -46,12 +46,12 @@ class CalcRMSE():
         rmse_opt_y = np.sqrt(mean_squared_error(self.optimized[1], self.groundtruth[2]))
         '''
 
-        rmse_orb_x = mean_absolute_error(self.orbslam[12], self.groundtruth[1])
-        rmse_orb_y = mean_absolute_error(self.orbslam[13], self.groundtruth[2])
+        rmse_orb_x = mean_absolute_error(self.equalizedORB[6], self.groundtruth[1])
+        rmse_orb_y = mean_absolute_error(self.equalizedORB[7], self.groundtruth[2])
         rmse_sfm_x = mean_absolute_error(self.opensfm[11], self.groundtruth[1])
         rmse_sfm_y = mean_absolute_error(self.opensfm[12], self.groundtruth[2])
-        rmse_droid_x = mean_absolute_error(self.droidslam[11], self.groundtruth[1])
-        rmse_droid_y = mean_absolute_error(self.droidslam[12], self.groundtruth[2])
+        rmse_droid_x = mean_absolute_error(self.equalizedDROID[6], self.groundtruth[1])
+        rmse_droid_y = mean_absolute_error(self.equalizedDROID[7], self.groundtruth[2])
         rmse_opt_x = mean_absolute_error(self.optimized[0], self.groundtruth[1])
         rmse_opt_y = mean_absolute_error(self.optimized[1], self.groundtruth[2])
         ##
@@ -91,17 +91,17 @@ class CalcRMSE():
         rmse_opt_pitch = np.sqrt(mean_squared_error(self.optimized[4]-np.median(self.optimized[4]), self.groundtruth[5]-np.median(self.groundtruth[5])))
         rmse_opt_yaw = np.sqrt(mean_squared_error(self.optimized[5]-np.median(self.optimized[5]), self.groundtruth[6]-np.median(self.groundtruth[6])))
         '''
-        rmse_orb_roll = mean_absolute_error(self.orbslam[3]-np.median(self.orbslam[3]), self.groundtruth[4]-np.median(self.groundtruth[4]))
-        rmse_orb_pitch = mean_absolute_error(self.orbslam[4]-np.median(self.orbslam[4]), self.groundtruth[5]-np.median(self.groundtruth[5]))
-        rmse_orb_yaw = mean_absolute_error(self.orbslam[5]-np.median(self.orbslam[5]), self.groundtruth[6]-np.median(self.groundtruth[6]))
+        rmse_orb_roll = mean_absolute_error(self.equalizedORB[3]-np.median(self.equalizedORB[3]), self.groundtruth[4]-np.median(self.groundtruth[4]))
+        rmse_orb_pitch = mean_absolute_error(self.equalizedORB[4]-np.median(self.equalizedORB[4]), self.groundtruth[5]-np.median(self.groundtruth[5]))
+        rmse_orb_yaw = mean_absolute_error(self.equalizedORB[5]-np.median(self.equalizedORB[5]), self.groundtruth[6]-np.median(self.groundtruth[6]))
 
         rmse_sfm_roll = mean_absolute_error(self.opensfm[2]-np.median(self.opensfm[2]), self.groundtruth[4]-np.median(self.groundtruth[4]))
         rmse_sfm_pitch = mean_absolute_error(self.opensfm[3]-np.median(self.opensfm[3]), self.groundtruth[5]-np.median(self.groundtruth[5]))
         rmse_sfm_yaw = mean_absolute_error(self.opensfm[4]-np.median(self.opensfm[4]), self.groundtruth[6]-np.median(self.groundtruth[6]))
 
-        rmse_droid_roll = mean_absolute_error(self.droidslam[3]-np.median(self.droidslam[3]), self.groundtruth[4]-np.median(self.groundtruth[4]))
-        rmse_droid_pitch = mean_absolute_error(self.droidslam[4]-np.median(self.droidslam[4]), self.groundtruth[5]-np.median(self.groundtruth[5]))
-        rmse_droid_yaw = mean_absolute_error(self.droidslam[5]-np.median(self.droidslam[5]), self.groundtruth[6]-np.median(self.groundtruth[6]))
+        rmse_droid_roll = mean_absolute_error(self.equalizedDROID[3]-np.median(self.equalizedDROID[3]), self.groundtruth[4]-np.median(self.groundtruth[4]))
+        rmse_droid_pitch = mean_absolute_error(self.equalizedDROID[4]-np.median(self.equalizedDROID[4]), self.groundtruth[5]-np.median(self.groundtruth[5]))
+        rmse_droid_yaw = mean_absolute_error(self.equalizedDROID[5]-np.median(self.equalizedDROID[5]), self.groundtruth[6]-np.median(self.groundtruth[6]))
 
         rmse_opt_roll = mean_absolute_error(self.optimized[3]-np.median(self.optimized[3]), self.groundtruth[4]-np.median(self.groundtruth[4]))
         rmse_opt_pitch = mean_absolute_error(self.optimized[4]-np.median(self.optimized[4]), self.groundtruth[5]-np.median(self.groundtruth[5]))
@@ -109,11 +109,14 @@ class CalcRMSE():
         
 
         cwd = os.getcwd()
-        tra = [[cwd ,rmse_orb, rmse_sfm, rmse_droid, rmse_opt]]
-        roll = [[cwd, rmse_orb_roll, rmse_sfm_roll, rmse_droid_roll, rmse_opt_roll]]
-        pitch = [[cwd, rmse_orb_pitch, rmse_sfm_pitch, rmse_droid_pitch, rmse_opt_pitch]]
-        yaw = [[cwd, rmse_orb_yaw, rmse_sfm_yaw, rmse_droid_yaw, rmse_opt_yaw]]
-
+        tra = [[cwd ,rmse_sfm, rmse_orb, rmse_droid, rmse_opt]]
+        roll = [[cwd, rmse_sfm_roll, rmse_orb_roll, rmse_droid_roll, rmse_opt_roll]]
+        pitch = [[cwd, rmse_sfm_pitch, rmse_orb_pitch, rmse_droid_pitch, rmse_opt_pitch]]
+        yaw = [[cwd, rmse_sfm_yaw, rmse_orb_yaw, rmse_droid_yaw, rmse_opt_yaw]]
+        print("tra",tra)
+        print("roll", roll)
+        print("pitch", pitch)
+        print("yaw", yaw)
         f1 = open('/home/sora-lab/Desktop/kitti_csv/tra.csv', mode="a", newline="")
         writer1 = csv.writer(f1)
         for data in tra:

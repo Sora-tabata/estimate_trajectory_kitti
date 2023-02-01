@@ -132,8 +132,22 @@ class Equalize():
             roll_ave.append(np.median(np.array(roll).T[i]))
             pitch_ave.append(np.median(np.array(pitch).T[i]))
             yaw_ave.append(np.median(np.array(yaw).T[i]))
+
+
+        x_ = np.vstack([np.array(x_ave), np.array(y_ave), np.array(z_ave)]).T
+        x__ = x_.copy()
+        y_ = np.vstack([self.groundtruth[2], self.groundtruth[1], self.groundtruth[3]]).T
+        y__ = y_.copy()
+        x_ = x_ - x_.mean(axis=0)
+        y_ = y_ - y_.mean(axis=0)
+        U, S, VT = np.linalg.svd(y_.T @ x_)
+        R__ = U @ VT
+        R_det = np.linalg.det(R__)
+        sigma = np.array([[1, 0, 0], [0, 1, 0], [0, 0, R_det]])
+        R = U @ sigma @ VT
+        x_ = (R @ x_.T).T
         
-        return x_ave, y_ave, z_ave, roll_ave, pitch_ave, yaw_ave
+        return x_ave, y_ave, z_ave, roll_ave, pitch_ave, yaw_ave, x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]+y__.mean(axis=0)[2]
 
 
     def equalizeORBSLAM(self):

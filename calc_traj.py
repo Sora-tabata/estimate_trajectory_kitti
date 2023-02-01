@@ -68,8 +68,8 @@ class CalcTraj():
         p1_ = np.rad2deg(np.cumsum(np.array(eul).T[1]))
         ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
         for i in range(self.n_frame):
-            r1[i] = -ya1_[i] #% 360 - 180
-            p1[i] = -p1_[i] #% 360 - 180
+            r1[i] = ya1_[i] #% 360 - 180
+            p1[i] = p1_[i] #% 360 - 180
             ya1[i] = r1_[i]
 
         return L, ground_points[0], ground_points[2], ground_points[1], r1 - r1[0], p1 - p1[0], ya1 - ya1[0]
@@ -130,7 +130,7 @@ class CalcTraj():
         ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
         for i in range(self.n_frame):
             r1[i] = -p1_[i]
-            p1[i] = ya1_[i] - 180
+            p1[i] = (ya1_[i] - 180)
             ya1[i] = r1_[i]
 
         
@@ -373,9 +373,9 @@ class CalcTraj():
             ya1[i] = r1_[i]
         '''
         q0 = L[:, 4]#7
-        q1 = L[:, 5]#6
+        q1 = L[:, 7]#6
         q2 = L[:, 6]#4
-        q3 = L[:, 7]#5
+        q3 = L[:, 5]#5
         r1_ = np.zeros(len(q0))
         p1_ = np.zeros(len(q0))
         ya1_ = np.zeros(len(q0))
@@ -392,5 +392,30 @@ class CalcTraj():
         ya1 = f3(time)
         p1 = -f2(time)
         #-(x__[:, 0]-x__[:, 0][0]), x__[:, 1]-x__[:, 1][0], x__[:, 2]-x__[:, 2][0],r1-r1[0], p1-p1[0], ya1-ya1[0], t_*k_sfm, t__*k_sfm, R3, x_, np.array(distance)*k_sfm,x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]-y__.mean(axis=0)[2]
+        
+        R_ = np.identity(3)
+        eul = []
+        for i in range(len(L)):
+            eul.append([CalcTraj.rotationMatrixToEulerAngles(self, np.array(R_).T @ np.array(R3[i]))])
+            R_ = R3[i]
+
+        r1 = np.zeros(len(L))
+        p1 = np.zeros(len(L))
+        ya1 = np.zeros(len(L))
+        r1_ = np.rad2deg(np.cumsum(np.array(eul).T[0]))
+        p1_ = np.rad2deg(np.cumsum(np.array(eul).T[1]))
+        ya1_ = np.rad2deg(np.cumsum(np.array(eul).T[2]))
+        for i in range(len(L)):
+            r1[i] = (ya1_[i] - 180)#p1_[i]
+            p1[i] = p1_[i]#(ya1_[i] - 180)
+            ya1[i] = r1_[i]
+        
+        f1 = interpolate.interp1d(new_t, r1, kind="linear", fill_value=(r1[0], r1[len(r1)-1]),bounds_error=False)#(r1[0], r1[len(r1)-1])
+        f3 = interpolate.interp1d(new_t, ya1, kind="linear", fill_value=(ya1[0], ya1[len(ya1)-1]),bounds_error=False)
+        f2 = interpolate.interp1d(new_t, p1, kind="linear", fill_value=(p1[0], p1[len(p1)-1]),bounds_error=False)
+        r1 = f1(time)
+        p1 = f2(time)
+        ya1 = f3(time)
+        
         return -(x__[:, 0]), x__[:, 1], x__[:, 2],r1, p1, ya1, t_*k_sfm, t__*k_sfm, R3, x_, np.array(distance)*k_sfm,x_[:, 1]+y__.mean(axis=0)[1], x_[:, 0]+y__.mean(axis=0)[0], x_[:, 2]-y__.mean(axis=0)[2]
 

@@ -131,7 +131,7 @@ class OptimizeTraj():
         '''
         RT = []
         for i in range(len(output[3])):
-            RT.append(output[3][i])
+            RT.append(output[3][i]+1)
         return t_sfm_new, R_sfm__, v_sfm, RT
 
 
@@ -171,6 +171,26 @@ class OptimizeTraj():
                 #Q_slam.append(np.linalg.inv(R_slam[i-1]) @ R_slam[i])
         #print("Q[0]=", Q_sfm[0])
         return Q_sfm, Q_slam, Q_sfm_r, Q_slam_r, Q_droid_r
+
+    def showRT(self):
+        rotateSfM = self.rotateSfM()
+        rotateDroid = self.rotateDroid()
+        RT_sfm = np.array(rotateSfM[3])
+        RT_slam_ = np.array(self.output[3])
+        RT_droid = np.array(rotateDroid[3])
+
+        time = Init().Nx
+        fig, rt = plt.subplots(figsize=(32, 8))
+
+        rt.plot(time[:], np.array(RT_sfm).T, color="red", lw=2, label="Normalized vehicle attitude from OpenSfM")
+        rt.plot(time[:], np.array(RT_slam_).T, color="green", lw=2, label="Normalized vehicle attitude from ORB-SLAM2")
+        rt.plot(time[:], np.array(RT_droid).T, color="blue", lw=2, label="Normalized vehicle attitude from DROID-SLAM")
+        rt.legend(fancybox=False, shadow=False, edgecolor='black')
+        rt.set_xlabel("Time [s]")
+        rt.set_ylabel("Normalized vehicle attitude")
+        plt.grid(True)
+        plt.savefig('output/opted/RT.png')
+                
 
 
     def calcWeight(self):

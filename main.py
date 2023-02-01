@@ -49,5 +49,5 @@ if __name__ == '__main__':
     b.showPitch(a.groundtruth,a.opensfm, a.orbslam, a.droidslam, a.optimized, a.equalizedORB, a.equalizedDROID)
     b.showYaw(a.groundtruth,a.opensfm, a.orbslam, a.droidslam, a.optimized, a.equalizedORB, a.equalizedDROID)
     #b.showZ(a.groundtruth,a.opensfm, a.orbslam, a.droidslam, a.optimized)
-    CalcRT().showRT()
+    OptimizeTraj().showRT()
 
